@@ -1,0 +1,5 @@
+.idea
+vendor
+tests
+src/config.php
+src/.env.example

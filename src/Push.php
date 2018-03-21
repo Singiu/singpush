@@ -11,7 +11,7 @@ class Push
 {
     public static function sendMessage($deviceToken, $title, $message, $platform)
     {
-        $class = '\\Singiu\\Singpush\\' . ucfirst($platform) . 'Push';
+        $class = '\\Singiu\\Singpush\\Services\\' . ucfirst($platform) . 'Push';
         $push = new $class();
         return call_user_func_array(array($push, 'sendMessage'), [
             'deviceToken' => $deviceToken,

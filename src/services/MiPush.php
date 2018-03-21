@@ -1,8 +1,9 @@
 <?php
 
-namespace Singiu\Singpush;
+namespace Singiu\Singpush\Services;
 
 use Singiu\Http\Request;
+use Singiu\Singpush\Contracts\PushInterface;
 
 class MiPush implements PushInterface
 {

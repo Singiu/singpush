@@ -1,6 +1,6 @@
 <?php
 
-namespace Singiu\Singpush;
+namespace Singiu\Singpush\Contracts;
 
 interface PushInterface
 {

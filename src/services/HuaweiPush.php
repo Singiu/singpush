@@ -1,10 +1,11 @@
 <?php
 
-namespace Singiu\Singpush;
+namespace Singiu\Singpush\Services;
 
 use Singiu\Http\Http;
 use Singiu\Http\Request;
 use Singiu\Http\Response;
+use Singiu\Singpush\Contracts\PushInterface;
 
 class HuaweiPush implements PushInterface
 {

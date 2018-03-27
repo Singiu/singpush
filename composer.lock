@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "d482c066d44880e2e5a5f2148d9b83ba",
+    "content-hash": "2cf5f9045045ad617e0df741c7adc2ea",
     "packages": [
         {
             "name": "singiu/http-php",
-            "version": "dev-master",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Singiu/http-php.git",
-                "reference": "334d1cc1c1e16f57e440471d600098812abc5a75"
+                "reference": "db1389968b8bf30af693aa97adcda44e2dac8e92"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://files.phpcomposer.com/files/Singiu/http-php/334d1cc1c1e16f57e440471d600098812abc5a75.zip",
-                "reference": "334d1cc1c1e16f57e440471d600098812abc5a75",
+                "url": "https://files.phpcomposer.com/files/Singiu/http-php/db1389968b8bf30af693aa97adcda44e2dac8e92.zip",
+                "reference": "db1389968b8bf30af693aa97adcda44e2dac8e92",
                 "shasum": ""
             },
             "require-dev": {
@@ -39,7 +39,7 @@
                     "email": "junxing.lin@foxmail.com"
                 }
             ],
-            "time": "2018-03-19T03:30:10+00:00"
+            "time": "2018-03-27T03:35:40+00:00"
         },
         {
             "name": "symfony/dotenv",
@@ -1422,11 +1422,11 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "singiu/http-php": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": ">=5.4.0"
+    },
     "platform-dev": []
 }

@@ -7,17 +7,27 @@ use Singiu\Singpush\Contracts\PushInterface;
 
 class UmengPush implements PushInterface
 {
-    private $app_key;
-    private $app_master_secret;
+    private $_appKey;
+    private $_appMasterSecret;
     private $request;
 
     /**
      * 构造函数。
+     *
+     * @param array $config
      */
-    public function __construct()
+    public function __construct($config = null)
     {
-        $this->app_key = getenv('UMENG_APP_KEY');
-        $this->app_master_secret = getenv('UMENG_APP_MASTER_SECRET');
+        if ($config != null && isset($config['umeng']['app_key']) && $config['umeng']['app_key'] != '') {
+            $this->_appKey = $config['umeng']['app_key'];
+        } else {
+            $this->_appKey = getenv('UMENG_APP_KEY');
+        }
+        if ($config != null && isset($config['umeng']['app_master_secret']) && $config['umeng']['app_master_secret'] != '') {
+            $this->_appMasterSecret = $config['umeng']['app_master_secret'];
+        } else {
+            $this->_appMasterSecret = getenv('UMENG_APP_MASTER_SECRET');
+        }
         $this->request = new Request();
     }
 
@@ -28,23 +38,25 @@ class UmengPush implements PushInterface
      * @param $postBody
      * @return string
      */
-    private function getSign($method, $url, $postBody)
+    private function _getSign($method, $url, $postBody)
     {
-        $signString = $method . $url . $postBody . $this->app_master_secret;
-        return md5($signString);
+        $sign_string = $method . $url . $postBody . $this->_appMasterSecret;
+        return md5($sign_string);
     }
 
     /**
      * 发送消息通知。
+     *
      * @param $deviceToken
      * @param $title
      * @param $message
      * @return \Singiu\Http\Response
+     * @throws
      */
     public function sendMessage($deviceToken, $title, $message)
     {
         $payload = [
-            'appkey' => $this->app_key,
+            'appkey' => $this->_appKey,
             'timestamp' => time(),
             'type' => 'unicast', // 单播发送
             'device_tokens' => $deviceToken,
@@ -63,7 +75,7 @@ class UmengPush implements PushInterface
         $data = json_encode($payload);
         $response = $this->request->post($requestUrl, [
             'query' => [
-                'sign' => $this->getSign('POST', $requestUrl, $data)
+                'sign' => $this->_getSign('POST', $requestUrl, $data)
             ],
             'data' => $data
         ]);

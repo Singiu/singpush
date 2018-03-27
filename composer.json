@@ -1,16 +1,17 @@
 {
     "name": "singiu/singpush",
     "type": "library",
+    "license": "MIT",
     "authors": [
         {
             "name": "singiu",
             "email": "junxing.lin@foxmail.com"
         }
     ],
-    "minimum-stability": "stable",
     "require": {
-        "singiu/http-php": "dev-master",
-        "symfony/dotenv": "^3.4"
+        "PHP": ">=5.4.0",
+        "symfony/dotenv": "^3.4",
+        "singiu/http-php": "^1.0.0"
     },
     "autoload": {
         "psr-4": {
@@ -19,5 +20,7 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7"
+    },
+    "repositories": {
     }
 }

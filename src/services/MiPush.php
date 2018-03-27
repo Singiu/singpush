@@ -7,17 +7,39 @@ use Singiu\Singpush\Contracts\PushInterface;
 
 class MiPush implements PushInterface
 {
-    private $app_package_name;
-    private $app_secret;
-    private $request;
+    private $_appPackageName;
+    private $_appSecret;
+    private $_request;
 
-    public function __construct()
+    /**
+     * MiPush constructor.
+     *
+     * @param null $config
+     */
+    public function __construct($config = null)
     {
-        $this->app_package_name = getenv('MI_APP_PACKAGE_NAME');
-        $this->app_secret = getenv('MI_APP_SECRET');
-        $this->request = new Request();
+        if ($config != null && isset($config['mi']['app_package_name']) && $config['mi']['app_package_name'] != '') {
+            $this->_appPackageName = $config['mi']['app_package_name'];
+        } else {
+            $this->_appPackageName = getenv('MI_APP_PACKAGE_NAME');
+        }
+        if ($config != null && isset($config['mi']['app_secret']) && $config['mi']['app_secret'] != '') {
+            $this->_appSecret = $config['mi']['app_secret'];
+        } else {
+            $this->_appSecret = getenv('MI_APP_SECRET');
+        }
+        $this->_request = new Request();
     }
 
+    /**
+     * 发送推送通知。
+     *
+     * @param $deviceToken
+     * @param $title
+     * @param $message
+     * @return \Singiu\Http\Response
+     * @throws \Exception
+     */
     public function sendMessage($deviceToken, $title, $message)
     {
         $payload = [
@@ -27,13 +49,13 @@ class MiPush implements PushInterface
             'payload' => $message, // 消息内容。
             'notify_type' => -1, // 提示通知默认设定，-1 = DEFAULT_ALL。
             'extra.notify_effect' => 1, // 预定义通知栏消息的点击行为，1 = 打开 app 的 Launcher Activity，2 = 打开 app 的任一 Activity（还需要 extra.intent_uri）,3 = 打开网页（还需要传入 extra.web_uri）
-            'restricted_package_name' => $this->app_package_name,
+            'restricted_package_name' => $this->_appPackageName,
             'registration_id' => $deviceToken
         ];
 
-        $response = $this->request->post('https://api.xmpush.xiaomi.com/v3/message/regid', [
+        $response = $this->_request->post('https://api.xmpush.xiaomi.com/v3/message/regid', [
             'headers' => [
-                'Authorization' => 'key=' . $this->app_secret
+                'Authorization' => 'key=' . $this->_appSecret
             ],
             'data' => $payload
         ]);

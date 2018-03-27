@@ -35,11 +35,28 @@ class ApnsPush implements PushInterface
     protected $_category;
     protected $_expire = 3600 * 24;
 
-    public function __construct()
+    /**
+     * ApnsPush constructor.
+     *
+     * @param null $config
+     */
+    public function __construct($config = null)
     {
-        $this->_certificate = getenv('APNS_CERTIFICATE_PATH');
-        $this->_certificatePassphrase = getenv('APNS_CERTIFICATE_PASSPHRASE');
-        $this->_environment = getenv('APNS_ENVIRONMENT') == 'production' ? self::ENVIRONMENT_PRODUCTION : self::ENVIRONMENT_SANDBOX;
+        if ($config != null && isset($config['apns']['certificate_path']) && $config['apns']['certificate_path'] != '') {
+            $this->_certificate = $config['apns']['certificate_path'];
+        } else {
+            $this->_certificate = getenv('APNS_CERTIFICATE_PATH');
+        }
+        if ($config != null && isset($config['apns']['certificate_passphrase']) && $config['apns']['certificate_passphrase'] != '') {
+            $this->_certificatePassphrase = $config['apns']['certificate_passphrase'];
+        } else {
+            $this->_certificatePassphrase = getenv('APNS_CERTIFICATE_PASSPHRASE');
+        }
+        if ($config != null && isset($config['apns']['environment']) && $config['apns']['environment'] != '') {
+            $this->_environment = $config['apns']['environment'] == 'production' ? self::ENVIRONMENT_PRODUCTION : self::ENVIRONMENT_SANDBOX;
+        } else {
+            $this->_environment = getenv('APNS_ENVIRONMENT') == 'production' ? self::ENVIRONMENT_PRODUCTION : self::ENVIRONMENT_SANDBOX;
+        }
     }
 
     /**
@@ -91,6 +108,11 @@ class ApnsPush implements PushInterface
             $payload[self::APPLE_PAYLOAD_NAMESPACE]['content-available'] = $this->_contentAvailable;
         if (isset($this->_category))
             $payload[self::APPLE_PAYLOAD_NAMESPACE]['category'] = $this->_category;
+        /**
+         * APNS 中 payload 不支持 \u* 格式的编码
+         * 所以在使用 json_encode 函数的时候，需要使用 JSON_UNESCAPED_UNICODE 参数。
+         * 然而这个参数只有在 PHP 5.4 及以上的版本才支持。
+         */
         $payloadJson = json_encode($payload, JSON_UNESCAPED_UNICODE); // JSON_UNESCAPED_UNICODE 需要 PHP 5.4.0
         $payloadJson = str_replace(
             '"' . self::APPLE_PAYLOAD_NAMESPACE . '":[]',

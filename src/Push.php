@@ -2,11 +2,6 @@
 
 namespace Singiu\Singpush;
 
-use Symfony\Component\Dotenv\Dotenv;
-
-$dotenv = new Dotenv();
-$dotenv->load(__DIR__ . '/.env.example');
-
 class Push
 {
     private static $_config = null;

@@ -33,7 +33,7 @@ class ApnsPush implements PushInterface
     protected $_sound;
     protected $_contentAvailable;
     protected $_category;
-    protected $_expire = 3600 * 24;
+    protected $_expire;
 
     /**
      * ApnsPush constructor.
@@ -57,6 +57,7 @@ class ApnsPush implements PushInterface
         } else {
             $this->_environment = getenv('APNS_ENVIRONMENT') == 'production' ? self::ENVIRONMENT_PRODUCTION : self::ENVIRONMENT_SANDBOX;
         }
+        $this->_expire = 3600 * 24;
     }
 
     /**

@@ -28,10 +28,9 @@ class Push
     {
         $class = '\\Singiu\\Singpush\\Services\\' . ucfirst($platform) . 'Push';
         $push = new $class(self::$_config);
-        return call_user_func_array(array($push, 'sendMessage'), [
-            'deviceToken' => $deviceToken,
-            'title' => $title,
-            '$message' => $message
-        ]);
+        if (method_exists($push, 'sendMessage')) {
+            return $push->sendMessage($deviceToken, $title, $message);
+        }
+        return false;
     }
 }

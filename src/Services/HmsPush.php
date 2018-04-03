@@ -88,9 +88,6 @@ class HmsPush implements PushInterface
         }
         // 发送消息通知
         $this->_getAccessToken();
-        echo "\n\rAccessToken: " . $this->_accessToken;
-        echo "\n\rPayload: " . $payload;
-        // die($this->_getAccessToken());
         $response = $this->_http->post('https://api.push.hicloud.com/pushsend.do', [
             'query' => [
                 'nsp_ctx' => json_encode(['ver' => '1', 'appId' => $this->_clientId])

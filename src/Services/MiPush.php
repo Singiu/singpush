@@ -15,19 +15,30 @@ class MiPush implements PushInterface
      * MiPush constructor.
      *
      * @param null $config
+     * @throws \Exception
      */
     public function __construct($config = null)
     {
+        if ($config === null && !function_exists('getenv')) {
+            throw new \Exception('Cannot found any configurations!');
+        }
+
         if ($config != null && isset($config['mi']['app_package_name']) && $config['mi']['app_package_name'] != '') {
             $this->_appPackageName = $config['mi']['app_package_name'];
-        } else {
+        } else if (function_exists('getenv')) {
             $this->_appPackageName = getenv('MI_APP_PACKAGE_NAME');
+        } else {
+            throw new \Exception('Cannot found configuration: mi.app_package_name!');
         }
+
         if ($config != null && isset($config['mi']['app_secret']) && $config['mi']['app_secret'] != '') {
             $this->_appSecret = $config['mi']['app_secret'];
-        } else {
+        } else if (function_exists('getenv')) {
             $this->_appSecret = getenv('MI_APP_SECRET');
+        } else {
+            throw new \Exception('Cannot found configuration: mi.app_secret!');
         }
+
         $this->_request = new Request();
     }
 

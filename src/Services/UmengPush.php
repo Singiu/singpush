@@ -15,19 +15,30 @@ class UmengPush implements PushInterface
      * 构造函数。
      *
      * @param array $config
+     * @throws \Exception
      */
     public function __construct($config = null)
     {
+        if ($config === null && !function_exists('getenv')) {
+            throw new \Exception('Cannot found any configurations!');
+        }
+
         if ($config != null && isset($config['umeng']['app_key']) && $config['umeng']['app_key'] != '') {
             $this->_appKey = $config['umeng']['app_key'];
-        } else {
+        } else if (function_exists('getenv')) {
             $this->_appKey = getenv('UMENG_APP_KEY');
+        } else {
+            throw new \Exception('Cannot found configuration: umeng.app_key!');
         }
+
         if ($config != null && isset($config['umeng']['app_master_secret']) && $config['umeng']['app_master_secret'] != '') {
             $this->_appMasterSecret = $config['umeng']['app_master_secret'];
-        } else {
+        } else if (function_exists('getenv')) {
             $this->_appMasterSecret = getenv('UMENG_APP_MASTER_SECRET');
+        } else {
+            throw new \Exception('Cannot found configuration: umeng.app_master_secret!');
         }
+
         $this->request = new Request();
     }
 

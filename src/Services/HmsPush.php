@@ -18,18 +18,26 @@ class HmsPush implements PushInterface
      * 构造函数。
      *
      * @param array $config
+     * @throws \Exception
      */
     public function __construct($config = null)
     {
+        if ($config === null && !function_exists('getenv')) {
+            throw new \Exception('Cannot found any configurations!');
+        }
         if ($config != null && isset($config['hms']['client_id']) && $config['hms']['client_id'] != '') {
             $this->_clientId = $config['hms']['client_id'];
+        } else if (function_exists('getenv')) {
+            $this->_clientId = getenv('HMS_CLIENT_ID');
         } else {
-            $this->_clientId = getenv('HUAWEI_CLIENT_ID');
+            throw new \Exception('Cannot found configuration: hms.client_id!');
         }
         if ($config != null && isset($config['hms']['client_secret']) && $config['hms']['client_secret'] != '') {
             $this->_clientSecret = $config['hms']['client_secret'];
+        } else if (function_exists('getenv')) {
+            $this->_clientSecret = getenv('HMS_CLIENT_SECRET');
         } else {
-            $this->_clientSecret = getenv('HUAWEI_CLIENT_SECRET');
+            throw new \Exception('Cannot found configuration: hms.client_secret!');
         }
         $this->_http = new Request();
         $this->_http->setHttpVersion(Http::HTTP_VERSION_1_1);

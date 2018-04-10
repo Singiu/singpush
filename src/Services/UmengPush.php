@@ -57,22 +57,27 @@ class UmengPush implements PushInterface
     {
         $payload = [
             'appkey' => $this->_appKey,
-            'timestamp' => time(),
+            'timestamp' => time() . '', // 转成字符串。
             'type' => 'unicast', // 单播发送
             'device_tokens' => $deviceToken,
+            'production_mode' => true,
             'payload' => [
                 'display_type' => 'notification',
                 'body' => [
                     'ticker' => $message,
                     'title' => $title,
                     'text' => $message,
-                    'after_open' => 'go_app' // 默认打开应用
+                    'after_open' => 'go_app', // 默认打开应用
+                    "play_vibrate" => "false",
+                    "play_lights" => "false",
+                    "play_sound" => "true"
                 ]
             ]
         ];
 
-        $requestUrl = 'http://msg.umeng.com/api/send';
+        $requestUrl = 'https://msgapi.umeng.com/api/send';
         $data = json_encode($payload);
+        // die($data);
         $response = $this->request->post($requestUrl, [
             'query' => [
                 'sign' => $this->_getSign('POST', $requestUrl, $data)

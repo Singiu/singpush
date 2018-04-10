@@ -39,24 +39,37 @@ class ApnsPush implements PushInterface
      * ApnsPush constructor.
      *
      * @param null $config
+     * @throws \Exception
      */
     public function __construct($config = null)
     {
+        if ($config === null && !function_exists('getenv')) {
+            throw new \Exception('Cannot found any configurations!');
+        }
+
         if ($config != null && isset($config['apns']['certificate_path']) && $config['apns']['certificate_path'] != '') {
             $this->_certificate = $config['apns']['certificate_path'];
-        } else {
+        } else if (function_exists('getenv')) {
             $this->_certificate = getenv('APNS_CERTIFICATE_PATH');
+        } else {
+            throw new \Exception('Cannot found configuration: apns.certificate_path!');
         }
+
         if ($config != null && isset($config['apns']['certificate_passphrase']) && $config['apns']['certificate_passphrase'] != '') {
             $this->_certificatePassphrase = $config['apns']['certificate_passphrase'];
-        } else {
+        } else if (function_exists('getenv')) {
             $this->_certificatePassphrase = getenv('APNS_CERTIFICATE_PASSPHRASE');
+        } else {
+            throw new \Exception('Cannot found configuration: apns.certificate_passphrase!');
         }
+
         if ($config != null && isset($config['apns']['environment']) && $config['apns']['environment'] != '') {
             $this->_environment = $config['apns']['environment'] == 'production' ? self::ENVIRONMENT_PRODUCTION : self::ENVIRONMENT_SANDBOX;
-        } else {
+        } else if (function_exists('getenv')) {
             $this->_environment = getenv('APNS_ENVIRONMENT') == 'production' ? self::ENVIRONMENT_PRODUCTION : self::ENVIRONMENT_SANDBOX;
+            throw new \Exception('Cannot found configuration: apns.environment!');
         }
+
         $this->_expire = 3600 * 24;
     }
 

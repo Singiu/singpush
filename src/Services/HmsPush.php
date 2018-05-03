@@ -9,10 +9,10 @@ use Singiu\Singpush\Contracts\PushInterface;
 
 class HmsPush implements PushInterface
 {
-    private $_http;
+    private $_accessToken;
     private $_clientId;
     private $_clientSecret;
-    private $_accessToken;
+    private $_http;
 
     /**
      * 构造函数。
@@ -55,8 +55,7 @@ class HmsPush implements PushInterface
                 'client_secret' => $this->_clientSecret
             ]
         ]);
-        $this->_accessToken = $response->getResponseObject()->access_token;
-        // return $response->getResponseText();
+        return $response->getResponseText();
     }
 
     /**
@@ -69,7 +68,6 @@ class HmsPush implements PushInterface
      */
     public function sendMessage($deviceToken, $title, $message)
     {
-        // date_default_timezone_set('Asia/Shanghai');
         // 构建 Payload
         if (is_array($message)) {
             $payload = json_encode($message, JSON_UNESCAPED_UNICODE);

@@ -12,28 +12,28 @@ class ApnsPush implements PushInterface
     const PAYLOAD_MAXIMUM_SIZE = 2048;
     const DEVICE_TOKEN_SIZE = 32;
 
+    protected $_badge;
+    protected $_category;
     protected $_certificate;
     protected $_certificatePassphrase;
+
+    // socket information.
+    protected $_connectRetryTimes = 5;
+    protected $_connectTimeout = 10; // 连接超时，单位秒
+    protected $_contentAvailable; // 重连次数
+
+    // message information.
+    protected $_deviceToken;
     protected $_environment;
+    protected $_expire;
+    protected $_messageText;
+    protected $_messageTitle;
     protected $_serverUrl = array(
         'tls://gateway.push.apple.com:2195', // Production environment
         'tls://gateway.sandbox.push.apple.com:2195' // Sandbox environment
     );
-
-    // socket information.
     protected $_socket;
-    protected $_connectTimeout = 10; // 连接超时，单位秒
-    protected $_connectRetryTimes = 5; // 重连次数
-
-    // message information.
-    protected $_deviceToken;
-    protected $_messageTitle;
-    protected $_messageText;
-    protected $_badge;
     protected $_sound;
-    protected $_contentAvailable;
-    protected $_category;
-    protected $_expire;
 
     /**
      * ApnsPush constructor.
@@ -73,38 +73,43 @@ class ApnsPush implements PushInterface
         $this->_expire = 3600 * 24;
     }
 
-    /**
-     * 添加接收设备的 deviceToken。
-     *
-     * @param $deviceToken
-     * @throws \Exception
-     */
-    public function addRecipient($deviceToken)
+    protected function _connect()
     {
-        if (!preg_match('/^[a-f0-9]{64}$/i', $deviceToken)) {
-            throw new \Exception('Invalid device token!');
+        $url = $this->_serverUrl[$this->_environment];
+        $socketContext = stream_context_create([
+            'ssl' => [
+                'local_cert' => $this->_certificate,
+                'passphrase' => $this->_certificatePassphrase
+            ]
+        ]);
+        $retry = 0;
+        while ($retry < $this->_connectRetryTimes) {
+            if ($this->_socket = stream_socket_client($url, $errCode, $errMsg, $this->_connectTimeout, STREAM_CLIENT_CONNECT, $socketContext)) {
+                break;
+            } else if ($retry < $this->_connectRetryTimes) {
+                $retry++;
+            } else {
+                throw new \Exception("Failed to connect to APNS server:{$errCode} ({$errMsg})");
+            }
         }
-        $this->_deviceToken = $deviceToken;
     }
 
-    public function setTitle($title)
+    protected function _disconnect()
     {
-        $this->_messageTitle = $title;
+        if (is_resource($this->_socket)) {
+            return fclose($this->_socket);
+        }
+        return false;
     }
 
-    public function setText($text)
+    protected function _getNotificationBinary()
     {
-        $this->_messageText = $text;
-    }
-
-    public function setBadge($badge = 0)
-    {
-        $this->_badge = $badge;
-    }
-
-    public function setSound($sound = 'default')
-    {
-        $this->_sound = $sound;
+        $payload = $this->_getPayload();
+        $payloadLen = strlen($payload);
+        $messageId = time();
+        $expire = $messageId + $this->_expire;
+        $binary = pack('CNNnH*n', 1, $messageId, $expire, self::DEVICE_TOKEN_SIZE, $this->_deviceToken, $payloadLen) . $payload;
+        return $binary;
     }
 
     protected function _getPayload()
@@ -140,48 +145,24 @@ class ApnsPush implements PushInterface
         return $payloadJson;
     }
 
-    protected function _getNotificationBinary()
-    {
-        $payload = $this->_getPayload();
-        $payloadLen = strlen($payload);
-        $messageId = time();
-        $expire = $messageId + $this->_expire;
-        $binary = pack('CNNnH*n', 1, $messageId, $expire, self::DEVICE_TOKEN_SIZE, $this->_deviceToken, $payloadLen) . $payload;
-        return $binary;
-    }
-
-    protected function _connect()
-    {
-        $url = $this->_serverUrl[$this->_environment];
-        $socketContext = stream_context_create([
-            'ssl' => [
-                'local_cert' => $this->_certificate,
-                'passphrase' => $this->_certificatePassphrase
-            ]
-        ]);
-        $retry = 0;
-        while ($retry < $this->_connectRetryTimes) {
-            $this->_socket = stream_socket_client($url, $errCode, $errMsg, $this->_connectTimeout, STREAM_CLIENT_CONNECT, $socketContext);
-            if (!$this->_socket) {
-                throw new \Exception("Failed to connect to APNS server:{$errCode} ({$errMsg})");
-            }
-            $retry++;
-        }
-        return false;
-    }
-
     protected function _send()
     {
         $notificationBinary = $this->_getNotificationBinary();
         return fwrite($this->_socket, $notificationBinary);
     }
 
-    protected function _disconnect()
+    /**
+     * 添加接收设备的 deviceToken。
+     *
+     * @param $deviceToken
+     * @throws \Exception
+     */
+    public function addRecipient($deviceToken)
     {
-        if (is_resource($this->_socket)) {
-            return fclose($this->_socket);
+        if (!preg_match('/^[a-f0-9]{64}$/i', $deviceToken)) {
+            throw new \Exception('Invalid device token!');
         }
-        return false;
+        $this->_deviceToken = $deviceToken;
     }
 
     public function sendMessage($deviceToken, $title, $message)
@@ -194,5 +175,25 @@ class ApnsPush implements PushInterface
         $this->_connect();
         $this->_send();
         $this->_disconnect();
+    }
+
+    public function setBadge($badge = 0)
+    {
+        $this->_badge = $badge;
+    }
+
+    public function setSound($sound = 'default')
+    {
+        $this->_sound = $sound;
+    }
+
+    public function setText($text)
+    {
+        $this->_messageText = $text;
+    }
+
+    public function setTitle($title)
+    {
+        $this->_messageTitle = $title;
     }
 }

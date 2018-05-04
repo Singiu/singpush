@@ -67,6 +67,7 @@ class ApnsPush implements PushInterface
             $this->_environment = $config['apns']['environment'] == 'production' ? self::ENVIRONMENT_PRODUCTION : self::ENVIRONMENT_SANDBOX;
         } else if (function_exists('getenv')) {
             $this->_environment = getenv('APNS_ENVIRONMENT') == 'production' ? self::ENVIRONMENT_PRODUCTION : self::ENVIRONMENT_SANDBOX;
+        } else {
             throw new \Exception('Cannot found configuration: apns.environment!');
         }
 
@@ -83,15 +84,16 @@ class ApnsPush implements PushInterface
             ]
         ]);
         $retry = 0;
+        $errCode = null;
+        $errMsg = null;
         while ($retry < $this->_connectRetryTimes) {
             if ($this->_socket = stream_socket_client($url, $errCode, $errMsg, $this->_connectTimeout, STREAM_CLIENT_CONNECT, $socketContext)) {
-                break;
-            } else if ($retry < $this->_connectRetryTimes) {
-                $retry++;
+                return true;
             } else {
-                throw new \Exception("Failed to connect to APNS server:{$errCode} ({$errMsg})");
+                $retry++;
             }
         }
+        throw new \Exception("Failed to connect to APNS server:{$errCode} ({$errMsg})");
     }
 
     protected function _disconnect()

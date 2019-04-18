@@ -86,6 +86,11 @@ class UmengPush implements PushInterface
             ]
         ];
 
+        if (function_exists('getenv') && getenv('UMENG_MI_ACTIVITY')) {
+            $payload['mipush'] = true;
+            $payload['mi_activity'] = getenv('UMENG_MI_ACTIVITY');
+        }
+
         $requestUrl = 'https://msgapi.umeng.com/api/send';
         $data = json_encode($payload);
         // die($data);
